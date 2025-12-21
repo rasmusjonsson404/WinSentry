@@ -1,6 +1,6 @@
 @echo off
 
-SETLOCAL
+SETLOCAL EnableDelayedExpansion
 
 echo === Windows Log Analyzer: venv setup ===
 

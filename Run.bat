@@ -81,7 +81,6 @@ goto END
 
 :RUN_AUTOSTART
 python main.py -a
-echo WinSentry added to autostart
 pause
 goto MENU
 
