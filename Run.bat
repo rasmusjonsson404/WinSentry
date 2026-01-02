@@ -49,17 +49,19 @@ echo  1. Run standard mode using all modules
 echo  2. Show help page
 echo  3. Run with your own arguments
 echo  4. Add to Windows startup
-echo  5. Quit
+echo  5. Remove from Windows startup
+echo  6. Quit
 echo.
 echo Autostart: !color!!autostart_status!!ESC![0m
 echo.
-set /p choice="Choose (1-5): "
+set /p choice="Choose (1-6): "
 
 if "%choice%"=="1" goto RUN_STANDARD_MODE
 if "%choice%"=="2" goto RUN_HELP
 if "%choice%"=="3" goto RUN_CUSTOM
 if "%choice%"=="4" goto RUN_AUTOSTART
-if "%choice%"=="5" goto END
+if "%choice%"=="5" goto RUN_UNAUTOSTART
+if "%choice%"=="6" goto END
 
 echo Not a valid choice
 pause
@@ -81,6 +83,11 @@ goto END
 
 :RUN_AUTOSTART
 python main.py -a
+pause
+goto MENU
+
+:RUN_UNAUTOSTART
+python main.py -u
 pause
 goto MENU
 

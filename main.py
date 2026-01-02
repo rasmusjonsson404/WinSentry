@@ -3,12 +3,14 @@ import platform
 import argparse
 from termcolor import colored, cprint
 from src import utils
+from colorama import just_fix_windows_console
+
+just_fix_windows_console()
 
 def main():
 
     parser = argparse.ArgumentParser(
         description="WinSentry: Windows Security Log Analyzer & Visualizer",
-        epilog="Developed for Applied Scripting Course."
     )
 
     parser.add_argument(
@@ -19,51 +21,46 @@ def main():
     )
 
     parser.add_argument(
-        "--install",
+        "-a", "--autostart",
         action="store_true",
-        help="Install WinSentry to Windows Task Scheduler (Requires Admin)."
+        help="Add WinSentry to Windows Task Scheduler (Requires Admin)."
+    )
+
+    parser.add_argument(
+        "-u", "--unautostart",
+        action="store_true",
+        help="Remove WinSentry from Windows Task Scheduler (Requires Admin)."
     )
 
     # This line reads sys.argv and matches it against rules above.
     # If -h is used, it prints help and exits here.
     args = parser.parse_args()
 
-    # --- STEP 4: Use the values ---
-    print("--- WinSentry Initialized ---")
+    if args.autostart:
+        print(">> Mode: Installation of autostart")
+        utils.install_scheduled_task()
 
-    if args.install:
-        print(">> Mode: Installation")
-        # install_autostart()
+    elif args.unautostart:
+        print(">> Mode: Uninstallation of autostart")
+        utils.uninstall_scheduled_task()
         
     elif args.dashboard:
         print(">> Mode: Dashboard")
         # run_dashboard()
         
-    elif args.file:
-        print(f">> Mode: Offline Analysis of file: {args.file}")
-        # analyze_file(args.file)
-        
     else:
-        print(">> No specific mode selected. Running default scan...")
-        # default_scan()
+        print(">> No specific mode selected. Running standard mode...")
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nAborted by user.")
+        cprint("\nAborted by user.", "yellow")
     except Exception as e:
-        print(f"\nCritical Error: {e}")
+        cprint(f"\nCritical Error: {e}","red")
     finally:
         # Keeps window open if double-clicked
         input("\nPress Enter to exit...")
-
-def arg_handler():
-     
-     parser = argparse.ArgumentParser(
-        description="WinSentry: Windows Security Log Analyzer & Visualizer",
-        epilog="Developed for Applied Scripting Course."
-    )
 
 def check_os():
         if platform.system() != "Windows":

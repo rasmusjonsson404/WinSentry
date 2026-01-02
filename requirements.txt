@@ -4,3 +4,4 @@ dash>=2.14.0
 plotly>=5.18.0
 python-evtx>=0.8.1
 termcolor>=3.2.0
+colorama>=0.4.6

@@ -3,6 +3,9 @@ import sys
 import os
 import ctypes
 from termcolor import colored, cprint
+from colorama import just_fix_windows_console
+
+just_fix_windows_console()
 
 def is_admin():
     try:
@@ -35,6 +38,8 @@ def install_scheduled_task():
     # /F           = Force
     # /TR          = Task Run
     
+    check_command = ["schtasks", "/Create", "/TN", task_name, "/TR", action_command, "/SC", "ONLOGON", "/RL", "HIGHEST", "/F"]
+
     command = [
         "schtasks", "/Create",
         "/TN", task_name,
@@ -58,33 +63,37 @@ def install_scheduled_task():
         cprint(f"An error occurred at the installation: {e}", "red")
 
 def uninstall_scheduled_task():
-    # Removing WinSentry from autostart through task scheduler
     if not is_admin():
         cprint("ERROR: You must be admin to run uninstallation", "red")
         return
     
     task_name = "WinSentry"
-    
-    # Running command to remove from task scheduler
-    # /TN          = Task Name
-    # /F           = Force
-    
-    command = [
-            "schtasks", "/Delete",
-            "/TN", task_name,
-            "/F"
-        ]
 
-    # Check if removing autostart succeeded
+    # Check if task exist
+    # "schtasks /Query" return 0 if it exist, 1 if missing.
+    check_command = ["schtasks", "/Query", "/TN", task_name]
+    
+    check_result = subprocess.run(
+        check_command, 
+        stdout=subprocess.DEVNULL, 
+        stderr=subprocess.DEVNULL
+    )
+
+    # If task do not exist.
+    if check_result.returncode != 0:
+        cprint(f"Could not find any task with the name: '{task_name}'.", "yellow")
+        return
+
+    # If exist remove task.
+    delete_command = ["schtasks", "/Delete", "/TN", task_name, "/F"]
+
     try:
-        result = subprocess.run(command, capture_output=True, text=True)
+        delete_result = subprocess.run(delete_command, capture_output=True, text=True)
         
-        if result.returncode == 0:
-            cprint(f"Success! '{task_name}' have been removed autostart.", "green")
-        elif "The specified task name" in result.stderr:
-            cprint(f"Could not find any task with the name: '{task_name}'.", "red")
+        if delete_result.returncode == 0:
+            cprint(f"Success! '{task_name}' has been removed from autostart.", "green")
         else:
-            cprint(f"Did not manage to remove the task: {result.stderr}", "red")
+            cprint(f"Critical error removing task: {delete_result.stderr.strip()}", "red")
             
     except Exception as e:
         cprint(f"An error occurred at uninstallation: {e}", "red")
