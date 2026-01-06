@@ -15,6 +15,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Autostart](#autostart)
+- [Logging](#logging)
 
 ## 🔭 Project Overview
 The primary mission of WinSentry is to detect potential security threats, such as brute-force attacks, by monitoring the Windows Security Log. Unlike simple scripts, WinSentry utilizes a **defensive programming architecture** to ensure resilience against crashes and environment errors.
@@ -56,3 +57,40 @@ You can alternately run WinSentry via a Command Line Interface (CLI). **Note:** 
 ### Autostart
 
 You can set the application to autostart with windows. This is done through windows task scheduler. To set the application to autostart you will have to run the terminal with admin privileges. I you can easily add the application to autostart through the `Run.bat` by choosing option 4 in the menu. You can alternately run the application one time with the `-a` or `--autostart` argument.
+
+## 📝 Logging & Diagnostics
+WinSentry includes a robust, enterprise-grade logging system designed for long-term operation and traceability.
+
+### Storage & Format
+* **Location:** All logs are stored in the `logs/` directory in the project root.
+* **Format:** Logs are saved in **Structured JSON** format. This makes them machine-readable and easy to parse for future analysis or SIEM integration.
+
+**Example Log Entry:**
+```json
+{
+  "timestamp": "2026-01-06T14:30:00.123456+00:00",
+  "level": "ERROR",
+  "event_source": "src.ingestor",
+  "message": "Failed to read event log.",
+  "module": "ingestor",
+  "line_number": 45,
+  "traceback": "Traceback (most recent call last)..."
+}
+```
+### Changing logging interval
+
+The logging rotation, interval and logs amount to save can be changed in `logging.py`.
+
+**Look for:**
+```python
+'rotating_file_handler': {
+  'class': 'logging.handlers.TimedRotatingFileHandler',
+  'filename': log_filename,
+  'when': 'midnight',      # Rotate at midnight
+  'interval': 1,           # Every day (once per midnight)
+  'backupCount': 30,       # Save the latest 30 files (erase older ones)
+  'formatter': 'json',
+  'encoding': 'utf-8',
+  'level': 'DEBUG',
+  }
+```
