@@ -12,8 +12,8 @@
 - [Project Overview](#-project-overview)
 - [Key Features](#-key-features)
 - [System Requirements](#-system-requirements)
-- [Installation](#-installation)
-- [Usage](#%EF%B8%8F-installation)
+- [Installation](##%EF%B8%8F-installation)
+- [Usage](#-usage)
 - [Autostart](#autostart)
 - [Logging](#-logging--diagnostics)
 
