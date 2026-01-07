@@ -4,6 +4,7 @@ import os
 import ctypes
 from termcolor import colored, cprint
 from colorama import just_fix_windows_console
+import logging
 
 just_fix_windows_console()
 
@@ -17,6 +18,7 @@ def install_scheduled_task():
     # Adding WinSentry to autostart through task scheduler
     if not is_admin():
         cprint("ERROR: You must be admin to run installation", "red")
+        logging.info("Did not manage to add program to windows startup. User do not have admin privileges.")
         return
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,15 +58,19 @@ def install_scheduled_task():
         if result.returncode == 0:
             cprint(f"Success! WinSentry added to autostart.", "green")
             cprint(f"Using Python interpreter at: {venv_python}", "cyan")
+            logging.info("Successfully added program to windows startup.")
         else:
             cprint(f"Did not manage to add to autostart: {result.stderr}", "red")
+            logging.error("Did not manage to add program to windows startup.")
             
     except Exception as e:
         cprint(f"An error occurred at the installation: {e}", "red")
+        logging.error("Did not manage to add program to windows startup.")
 
 def uninstall_scheduled_task():
     if not is_admin():
         cprint("ERROR: You must be admin to run uninstallation", "red")
+        logging.error("Can not remove program from windows startup. User do not have admin privileges")
         return
     
     task_name = "WinSentry"
@@ -92,8 +98,11 @@ def uninstall_scheduled_task():
         
         if delete_result.returncode == 0:
             cprint(f"Success! '{task_name}' has been removed from autostart.", "green")
+            logging.info("Program removed from windows startup.")
         else:
             cprint(f"Critical error removing task: {delete_result.stderr.strip()}", "red")
+            logging.critical(f"{delete_result.stderr.strip()}")
             
     except Exception as e:
         cprint(f"An error occurred at uninstallation: {e}", "red")
+        logging.error(f"ERROR: {e}")

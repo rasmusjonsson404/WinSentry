@@ -6,7 +6,11 @@
   <br>
 </div>
 
-**WinSentry** is a robust, automated cybersecurity tool designed to ingest, normalize, and visualize Windows Event Logs in real-time. Developed as part of the "Applied Scripting" course, this application transforms unstructured security data (specifically Event ID 4625) into actionable intelligence via an interactive web dashboard.
+**WinSentry** is a robust, automated cybersecurity tool designed to ingest, normalize, and visualize Windows Event Logs in real-time. This application transforms unstructured security data (specifically Event ID 4625) into actionable intelligence via an interactive web dashboard.
+
+# Important!
+
+**This program must be running with administrator privileges to function properly.**
 
 ## 📋 Table of Contents
 - [Project Overview](#-project-overview)
