@@ -10,7 +10,17 @@
 
 # Important!
 
-**This program must be running with administrator privileges to function properly.**
+**This program requires administrator privileges to function properly.**
+The included launcher (`Run.bat`) will automatically request these privileges when started.
+
+## 🗺 Roadmap
+
+| Version | Status | Focus | Key Features |
+| :--- | :--- | :--- | :--- |
+| **v0.1.0** | ✅ **Completed** | **MVP (Core)** | • Log Ingestion (ID 4625)<br>• Web Dashboard (Dash)<br>• JSON Structured Logging<br>• Admin Auto-elevation<br>• Centralized Config |
+| **v0.2.0** | 🚧 *In Progress* | **Optimization** | • Filter by Date Range in Dashboard<br>• Export Report to CSV/PDF<br>• Support for more Event ID:s |
+| **v0.3.0** | 🔮 *Planned* | **Advanced Analysis** | • IP Geolocation Mapping<br>• Email Alerts for High Failure Rate<br>• Multi-Server Log Aggregation |
+| **v1.0.0** | 🔮 *Planned* | **Production** | • Docker Containerization<br>• User Authentication for Dashboard<br>• SIEM Forwarder Integration |
 
 ## 📋 Table of Contents
 - [Project Overview](#-project-overview)
@@ -18,8 +28,10 @@
 - [System Requirements](#-system-requirements)
 - [Installation](##%EF%B8%8F-installation)
 - [Usage](#-usage)
-- [Autostart](#autostart)
+- [Configuration](#%EF%B8%8F-installation)
+- [Autostart & Background Service](#-autostart--background-service)
 - [Logging](#-logging--diagnostics)
+- [Documentation](#-documentation)
 
 ## 🔭 Project Overview
 The primary mission of WinSentry is to detect potential security threats, such as brute-force attacks, by monitoring the Windows Security Log. Unlike simple scripts, WinSentry utilizes a **defensive programming architecture** to ensure resilience against crashes and environment errors.
@@ -29,8 +41,9 @@ It reads raw Windows Event Logs via the Win32 API, parses complex message string
 ## ✨ Key Features
 * **Live Data Ingestion:** Real-time reading of Windows Event Logs using `pywin32`.
 * **Forensic Normalization:** Extracts critical data (IP Address, User Account, Failure Status) from unstructured text using advanced Regex.
-* **Interactive Dashboard:** A web-based UI built with Dash/Plotly displaying security KPIs and attack timelines.
-* **Robust Architecture:** Implements strict environment checks (OS & Admin privileges) and "crash-safe" error handling.
+* **Interactive Dashboard:** A web-based UI built with Dash/Plotly displaying security KPIs, attack timelines, and a live heartbeat.
+* **Background Service:** Can be installed to run silently at system startup (Session 0) to monitor threats 24/7.
+* **Centralized Configuration:** Easy management of ports, logging intervals, and data retention via a single config file.
 * **Structured Logging:** All internal application events are logged in JSON format for full traceability.
 
 ## 💻 System Requirements
@@ -38,8 +51,7 @@ Due to reliance on the Windows API (`win32evtlog`), this application has strict 
 
 * **OS:** Windows 10 or Windows 11.
 * **Python:** Version 3.9 or higher.
-* **Privileges:** **Administrator rights are mandatory**.
-    * *Reason:* Accessing the Windows `Security` event log requires elevated privileges. The script will perform a self-check and exit if these rights are missing.
+* **Privileges:** **Administrator rights are mandatory** to access the Windows `Security` event log.
 
 ## ⚙️ Installation
 
@@ -49,25 +61,61 @@ Due to reliance on the Windows API (`win32evtlog`), this application has strict 
     cd WinSentry
     ```
 
-2. **Create a Virtual Environment** \
-    Run the `Setup.bat` to create a .venv and intall the required libraries for python.
+2. **Setup Environment** \
+    Run `Setup.bat` to automatically create a virtual environment (`.venv`) and install all required libraries.
 
 ## 🚀 Usage
 
-Execute `Run.bat` to easily run the program with a menu. (You have to run it as Admin if you want to use option 4 and add the program to autostart with windows)
+Double-click `Run.bat` to start the application. It will automatically ask for Admin privileges and open the main menu.
 
-You can alternately run WinSentry via a Command Line Interface (CLI). **Note:** You must run your terminal as Administrator.
+**Menu Options:**
+1. **Run WinSentry (Dashboard Mode):** Starts the web server and opens the dashboard in your browser.
+2. **Run WinSentry (Terminal Mode):** Runs a lightweight text-only monitor in the console.
+3. **Show Help:** Displays CLI arguments.
+4. **Run with Arguments:** Allows you to manually type flags (e.g., `-t` or `--stop`).
+5. **Add to Windows Startup:** Installs WinSentry as a hidden background service that starts when the computer boots.
+6. **Remove from Windows Startup:** Uninstalls the background task.
+7. **Stop Background Service:** Immediately stops the hidden background process.
+8. **Quit:** Exits the launcher.
 
-### Autostart
+## ⚙️ Configuration
+You do not need to edit the source code to change settings. 
+Once the program runs for the first time, a file named `config/settings.conf` is generated.
 
-You can set the application to autostart with windows. This is done through windows task scheduler. To set the application to autostart you will have to run the terminal with admin privileges. I you can easily add the application to autostart through the `Run.bat` by choosing option 4 in the menu. You can alternately run the application one time with the `-a` or `--autostart` argument.
+You can edit this file to change:
+* **Dashboard Port:** Change the web server port (Default: 8050).
+* **Refresh Rate:** How often the dashboard updates (Default: 5 seconds).
+* **Log Retention:** How many days to keep logs before deleting them.
+* **Log Rotation:** How often to create new log files (e.g., Midnight).
+
+**Example `settings.conf`:**
+```ini
+[LOGGING]
+when = midnight
+interval = 1
+backup_count = 30
+
+[DASHBOARD]
+port = 8050
+refresh_interval = 5
+max_events = 200
+```
+
+## 🛡 Autostart & Background Service
+
+WinSentry can be scheduled to run automatically when Windows starts.
+
+* **How it works:** It uses the Windows Task Scheduler to run the script `ONSTART` (System Boot).
+* **Visibility:** It runs in **Session 0** (Background), meaning no terminal window will be visible.
+* **Monitoring:** To check if it's running, open your browser and go to `http://127.0.0.1:8050` (or your configured port).
+* **Stopping:** Since there is no window to close, use **Option 7** in `Run.bat` to stop the service.
 
 ## 📝 Logging & Diagnostics
 WinSentry includes a robust, enterprise-grade logging system designed for long-term operation and traceability.
 
 ### Storage & Format
-* **Location:** All logs are stored in the `logs/` directory in the project root.
-* **Format:** Logs are saved in **Structured JSON** format. This makes them machine-readable and easy to parse for future analysis or SIEM integration.
+* **Location:** All logs are stored in the `logs/` directory.
+* **Format:** Logs are saved in **Structured JSON** format.
 
 **Example Log Entry:**
 ```json
@@ -81,20 +129,8 @@ WinSentry includes a robust, enterprise-grade logging system designed for long-t
   "traceback": "Traceback (most recent call last)..."
 }
 ```
-### Changing logging interval
+## 📚 Documentation
+For more detailed information about the system architecture and implementation details, please refer to the `docs/` folder:
 
-The logging rotation, interval and logs amount to save can be changed in `logging.py`.
-
-**Look for:**
-```python
-'rotating_file_handler': {
-  'class': 'logging.handlers.TimedRotatingFileHandler',
-  'filename': log_filename,
-  'when': 'midnight',      # Rotate at midnight
-  'interval': 1,           # Every day (once per midnight)
-  'backupCount': 30,       # Save the latest 30 files (erase older ones)
-  'formatter': 'json',
-  'encoding': 'utf-8',
-  'level': 'DEBUG',
-  }
-```
+* **[System Architecture](docs/ARCHITECTURE.md):** High-level overview, data flow diagrams, and component descriptions.
+* **[Technical Documentation](docs/DOCUMENTATION.md):** Detailed explanations of the codebase, modules, and error handling strategies.
