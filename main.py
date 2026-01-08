@@ -3,6 +3,8 @@ import argparse
 import logging
 from termcolor import cprint
 from colorama import just_fix_windows_console
+
+# Import core modules
 from src import utils, core 
 from src.logger import setup_logging
 
@@ -21,38 +23,40 @@ def main():
     parser.add_argument("-v", "--version", action="version", version="WinSentry v0.1.0")
     parser.add_argument("-a", "--autostart", action="store_true", help="Install Autostart Task")
     parser.add_argument("-u", "--unautostart", action="store_true", help="Remove Autostart Task")
-    parser.add_argument("-d", "--dashboard", action="store_true", help="Launch Web Dashboard")
-    parser.add_argument("-s", "--standard", action="store_true", help="Run Standard Security Scan")
+    parser.add_argument("--stop", action="store_true", help="Stop the background service")
+    
+    # Terminal Mode Flag
+    parser.add_argument("-t", "--terminal", action="store_true", help="Run in Terminal Mode (Text-only Live Monitor)")
 
     args = parser.parse_args()
 
-    # Run correct mode
+    # Handle Modes (Traffic Cop)
     if args.autostart:
         print(">> Mode: Autostart Installation")
-        logging.info("Trying to add program to windows startup.")
         utils.install_scheduled_task()
 
     elif args.unautostart:
         print(">> Mode: Autostart Removal")
-        logging.info("Trying to remove program to windows startup.")
         utils.uninstall_scheduled_task()
         
-    elif args.dashboard:
-        print(">> Mode: Dashboard Launch")
-        logging.info("Dashboard mode started.")
-        # from src.dashboard import run_dashboard
-        # run_dashboard()
-        
-    elif args.standard:
-        # Run standard mode
-        logging.info("Standard mode started.")
+    elif args.terminal:
+        # Run the 'Terminal' mode (Live Monitor in Terminal)
+        logging.info("Terminal mode started.")
         core.run_standard_analysis()
-        
+
+    elif args.stop:
+        print(">> Mode: Stopping Service")
+        logging.info("User trying to stop program.")
+        utils.stop_scheduled_task()
+
     else:
-        # Standard if no arg was passed
-        print(">> No specific mode selected. Running default scan...")
-        logging.info("Standard mode started.")
-        core.run_standard_analysis()
+        # DEFAULT: Run Dashboard
+        print(">> No specific mode selected. Launching Dashboard (Default)...")
+        logging.info("Dashboard mode started (Default).")
+        
+        # Import here to save time if running other modes
+        from src.dashboard import run_dashboard
+        run_dashboard()
 
     logging.info("WinSentry CLI execution finished.")
 
@@ -61,7 +65,6 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         cprint("\nAborted by user.", "yellow")
-        logging.info("Program aborted by user.")
     except Exception as e:
         cprint(f"\nCritical Failure: {e}", "red")
         logging.exception("Fatal error in main loop.")

@@ -1,20 +1,18 @@
 import logging
 import logging.config
-import logging.handlers # Viktig import för rotation
+import logging.handlers
 import os
 import json
 import datetime
+import configparser
 
 class JSONFormatter(logging.Formatter):
     """
     Custom formatter to output logs in JSON format.
-    Fulfills the requirement for structured logging.
     """
     def format(self, record):
-        # Use timezone-aware UTC
         utc_time = datetime.datetime.now(datetime.timezone.utc)
         
-        # Create a dictionary structure for the log entry
         log_record = {
             "timestamp": utc_time.isoformat(), 
             "level": record.levelname,
@@ -24,11 +22,9 @@ class JSONFormatter(logging.Formatter):
             "line_number": record.lineno
         }
         
-        # If there is an error code passed in 'extra' arguments, add it
         if hasattr(record, 'error_code'):
             log_record['error_code'] = record.error_code
 
-        # If there is an exception/crash, add the traceback
         if record.exc_info:
             log_record['traceback'] = self.formatException(record.exc_info)
 
@@ -36,19 +32,75 @@ class JSONFormatter(logging.Formatter):
 
 def setup_logging():
     """
-    Sets up the logging configuration with Log Rotation.
-    
-    - Writes to 'logs/winsentry.log'.
-    - Rotates the log file every midnight.
-    - Keeps the last 30 days of logs (Retention Policy).
+    Sets up logging by reading from 'config/settings.conf'.
+    If the config file is missing, it creates it with default values 
+    for BOTH Logging and Dashboard to keep everything in one place.
     """
-    # Ensure logs directory exists
-    log_dir = "logs"
+    # Find paths (Root directory)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    log_dir = os.path.join(base_dir, "logs")
+    
+    # Define config directory and file path
+    config_dir = os.path.join(base_dir, "config")
+    config_file = os.path.join(config_dir, "settings.conf") # <--- CHANGED NAME
+
+    # Ensure directories exist
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
+        
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
 
-    # Using a static filename for the active logging.
-    # Automatically rename old files with date.
+    # Handle Configuration File (settings.conf)
+    config = configparser.ConfigParser()
+    
+    # Default settings for LOGGING
+    logging_defaults = {
+        'when': 'midnight',
+        'interval': '1',
+        'backup_count': '30'
+    }
+    
+    # Default settings for DASHBOARD (We add them here so the file is complete)
+    dashboard_defaults = {
+        'port': '8050',
+        'refresh_interval': '5',
+        'max_events': '200'
+    }
+
+    if not os.path.exists(config_file):
+        # Create file if missing with ALL sections
+        config['LOGGING'] = logging_defaults
+        config['DASHBOARD'] = dashboard_defaults # <--- ADDED
+        
+        try:
+            with open(config_file, 'w') as f:
+                config.write(f)
+        except Exception as e:
+            print(f"Warning: Could not create config/settings.conf: {e}")
+        
+        settings = logging_defaults
+    else:
+        # Read existing file
+        try:
+            config.read(config_file)
+            if 'LOGGING' in config:
+                settings = config['LOGGING']
+            else:
+                settings = logging_defaults
+        except Exception:
+            settings = logging_defaults
+
+    # Read values (with error handling)
+    log_when = settings.get('when', 'midnight')
+    try:
+        log_interval = int(settings.get('interval', '1'))
+        log_backup = int(settings.get('backup_count', '30'))
+    except ValueError:
+        log_interval = 1
+        log_backup = 30
+
+    # Configure Logger
     log_filename = os.path.join(log_dir, "winsentry.log")
 
     logging_config = {
@@ -60,13 +112,12 @@ def setup_logging():
             },
         },
         'handlers': {
-            # TimedRotatingFileHandler
             'rotating_file_handler': {
                 'class': 'logging.handlers.TimedRotatingFileHandler',
                 'filename': log_filename,
-                'when': 'midnight',      # Rotate at midnight
-                'interval': 1,           # Every day (once per midnight)
-                'backupCount': 30,       # Save the latest 30 files (erase older ones)
+                'when': log_when,       
+                'interval': log_interval,   
+                'backupCount': log_backup, 
                 'formatter': 'json',
                 'encoding': 'utf-8',
                 'level': 'DEBUG',

@@ -16,8 +16,8 @@ def clear_screen():
 
 def run_standard_analysis():
     logger.info("Initializing Live Monitor Mode...")
-
-    # --- Check if program is running with admin privileges ---
+    
+    # --- Check admin privileges immediately ---
     if not is_admin():
         logger.critical("Attempted to run Live Monitor without Admin privileges.")
         print("\n" + colored("CRITICAL ERROR: ACCESS DENIED", "red", attrs=['bold']))
@@ -26,14 +26,12 @@ def run_standard_analysis():
         print("Windows blocks access to the 'Security' event log for non-admin users.")
         print("Please close this terminal, right-click it, and select 'Run as Administrator'.")
         print("-" * 60)
-        input("\nPress Enter to exit...")
-        return
+        input("\nPress Enter to return to menu...") # Pause so the user can read
+        return # Abort function
     # --------------------------------------------------
 
     print("Starting Live Monitor... (Press Ctrl+C to stop)")
     time.sleep(2)
-
-    
 
     try:
         while True:

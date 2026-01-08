@@ -1,15 +1,30 @@
 @echo off
 
-cd /d "%~dp0"
+:: =========================================================
+::  AUTO-ELEVATION (Force Admin Privileges)
+:: =========================================================
+net session >nul 2>&1
+if %errorlevel% equ 0 goto :START
 
+echo Requesting Administrator privileges...
+if "%~1"=="" (
+    powershell -Command "Start-Process '%~dpnx0' -Verb RunAs"
+) else (
+    powershell -Command "Start-Process '%~dpnx0' -ArgumentList '%*' -Verb RunAs"
+)
+exit
+
+:START
+:: =========================================================
+::  MAIN SCRIPT
+:: =========================================================
+cd /d "%~dp0"
 SETLOCAL EnableDelayedExpansion
 
-:: Adding escape sign for terminal color management
 for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do (
   set "ESC=%%b"
 )
 
-:: Check for and activate .venv
 if exist .venv\Scripts\activate.bat (
     call ".venv\Scripts\activate.bat"
 ) else (
@@ -18,7 +33,6 @@ if exist .venv\Scripts\activate.bat (
     exit /b 1
 )
 
-:: Handle user targeting .bat instead of main.py with arguments
 if "%~1" neq "" (
     echo Run WinSentry with arguments: %*
     python main.py %*
@@ -26,49 +40,53 @@ if "%~1" neq "" (
 )
 
 :MENU
-:: Check if application is set to autostart
 schtasks /query /TN "WinSentry" >nul 2>&1
-
 if %errorlevel% equ 0 (
-    :: Set green
-    set "autostart_status=ACTIVE (Task Scheduler)"
+    set "autostart_status=ACTIVE (System Startup)"
     set "color=!ESC![92m"
 ) else (
-    ::Set red
     set "autostart_status=NOT ACTIVE"
     set "color=!ESC![91m"
 )
-:TEST
-:: Menu handling
+
 cls
 echo ==========================================
 echo                WinSentry    
 echo ==========================================
 echo.
-echo  1. Run standard mode using all modules
-echo  2. Show help page
-echo  3. Run with your own arguments
-echo  4. Add to Windows startup
-echo  5. Remove from Windows startup
-echo  6. Quit
+echo  1. Run WinSentry (Dashboard Mode)
+echo  2. Run WinSentry (Terminal Mode)
+echo  3. Show help page
+echo  4. Run with your own arguments
+echo  5. Add to Windows startup (Runs hidden at boot)
+echo  6. Remove from Windows startup
+echo  7. Stop background service (Kill process)
+echo  8. Quit
 echo.
 echo Autostart: !color!!autostart_status!!ESC![0m
 echo.
-set /p choice="Choose (1-6): "
+set /p choice="Choose (1-8): "
 
-if "%choice%"=="1" goto RUN_STANDARD_MODE
-if "%choice%"=="2" goto RUN_HELP
-if "%choice%"=="3" goto RUN_CUSTOM
-if "%choice%"=="4" goto RUN_AUTOSTART
-if "%choice%"=="5" goto RUN_UNAUTOSTART
-if "%choice%"=="6" goto END
+if "%choice%"=="1" goto RUN_DASHBOARD
+if "%choice%"=="2" goto RUN_TERMINAL
+if "%choice%"=="3" goto RUN_HELP
+if "%choice%"=="4" goto RUN_CUSTOM
+if "%choice%"=="5" goto RUN_AUTOSTART
+if "%choice%"=="6" goto RUN_UNAUTOSTART
+if "%choice%"=="7" goto RUN_STOP
+if "%choice%"=="8" goto END
 
 echo Not a valid choice
 pause
 goto MENU
 
-:RUN_STANDARD_MODE
-python main.py -s
+:RUN_DASHBOARD
+python main.py
+pause
+goto MENU
+
+:RUN_TERMINAL
+python main.py -t
 goto END
 
 :RUN_HELP
@@ -91,8 +109,12 @@ python main.py -u
 pause
 goto MENU
 
+:RUN_STOP
+python main.py --stop
+pause
+goto MENU
+
 :END
 echo.
 if "%choice%"=="1" pause
-
 ENDLOCAL
