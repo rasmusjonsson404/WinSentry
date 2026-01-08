@@ -252,7 +252,7 @@ def run_dashboard():
         titles = {'s': 'Attack Timeline (Per Second)', 'min': 'Attack Timeline (Per Minute)', 'h': 'Attack Timeline (Per Hour)', 'd': 'Attack Timeline (Per Day)'}
         chart_title = titles.get(granularity_code, 'Attack Timeline')
 
-        fig_timeline = px.line(df_time, x='Time', y='Count', title=chart_title)
+        fig_timeline = px.line(df_time, x='Time', y='Count', title=chart_title, markers=True)
         fig_timeline.update_layout(
             plot_bgcolor=COLORS['paper'], paper_bgcolor=COLORS['paper'], font_color=COLORS['text'],
             xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor=COLORS['border'])
