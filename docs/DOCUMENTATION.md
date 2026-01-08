@@ -43,6 +43,8 @@ Upon running `Run.bat`, you are presented with the following options:
 5.  **Add to Windows startup:** Configures the tool to run hidden at boot.
 6.  **Remove from Windows startup:** Disables the autostart task.
 7.  **Stop background service:** Kills any running background instances.
+8. **Run Test:** Run Test Script (Generate Events)
+9. **Clear security logs:** Run script to remove all security logs from windows (Only do to test the application from scratch).
 
 ### Command Line Interface (CLI)
 Advanced users can run `main.py` directly using the virtual environment's Python executable.
@@ -52,6 +54,7 @@ Advanced users can run `main.py` directly using the virtual environment's Python
 * `-u`, `--unautostart`: Remove the scheduled task.
 * `--stop`: Forcefully stop the background service.
 * `-v`, `--version`: Display version information.
+* `-d`, `--default`: Run in default mode with dashboard.
 
 ---
 

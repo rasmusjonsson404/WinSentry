@@ -150,10 +150,28 @@ def run_dashboard():
 
         # --- GRAPHS ---
         html.Div([
+            # Graph 1: Timeline (With Dropdown)
             html.Div([
+                html.Div([
+                    html.Span("Resolution: ", style={'fontWeight': 'bold', 'marginRight': '10px'}),
+                    dcc.Dropdown(
+                        id='time-granularity-selector',
+                        options=[
+                            {'label': 'Seconds', 'value': 's'},
+                            {'label': 'Minutes', 'value': 'min'},
+                            {'label': 'Hours', 'value': 'h'},
+                            {'label': 'Days', 'value': 'd'}
+                        ],
+                        value='min',
+                        clearable=False,
+                        style={'color': '#000', 'width': '150px', 'display': 'inline-block', 'verticalAlign': 'middle'}
+                    )
+                ], style={'marginBottom': '10px', 'textAlign': 'right'}),
+                
                 dcc.Graph(id='graph-timeline', style={'height': '350px'})
             ], style={'width': '65%', 'backgroundColor': COLORS['paper'], 'padding': '10px', 'borderRadius': '10px', 'border': f'1px solid {COLORS["border"]}'}),
 
+            # Graph 2: Reasons
             html.Div([
                 dcc.Graph(id='graph-reasons', style={'height': '350px'})
             ], style={'width': '33%', 'backgroundColor': COLORS['paper'], 'padding': '10px', 'borderRadius': '10px', 'border': f'1px solid {COLORS["border"]}'})
@@ -196,9 +214,10 @@ def run_dashboard():
          Output('program-logs', 'children'),
          Output('live-clock', 'children'),
          Output('kpi-status', 'children')],
-        [Input('interval-component', 'n_intervals')]
+        [Input('interval-component', 'n_intervals'),
+         Input('time-granularity-selector', 'value')]
     )
-    def update_metrics(n):
+    def update_metrics(n, granularity_code):
         current_settings = load_settings()
         limit_events = current_settings['max_events']
 
@@ -223,10 +242,17 @@ def run_dashboard():
         total_failures = len(df)
         top_ip = df['Source_IP'].mode()[0] if not df['Source_IP'].empty else "N/A"
 
-        df['Time'] = pd.to_datetime(df['TimeGenerated']).dt.floor('min')
+        # Dynamic grouping based on drop-down
+        # 's' = Second, 'min' = Minute, 'h' = Hour, 'd' = Day
+        df['Time'] = pd.to_datetime(df['TimeGenerated']).dt.floor(granularity_code)
+        
         df_time = df.groupby('Time').size().reset_index(name='Count')
         
-        fig_timeline = px.line(df_time, x='Time', y='Count', title='Attack Timeline')
+        # Update title
+        titles = {'s': 'Attack Timeline (Per Second)', 'min': 'Attack Timeline (Per Minute)', 'h': 'Attack Timeline (Per Hour)', 'd': 'Attack Timeline (Per Day)'}
+        chart_title = titles.get(granularity_code, 'Attack Timeline')
+
+        fig_timeline = px.line(df_time, x='Time', y='Count', title=chart_title)
         fig_timeline.update_layout(
             plot_bgcolor=COLORS['paper'], paper_bgcolor=COLORS['paper'], font_color=COLORS['text'],
             xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor=COLORS['border'])

@@ -42,7 +42,7 @@ def setup_logging():
     
     # Define config directory and file path
     config_dir = os.path.join(base_dir, "config")
-    config_file = os.path.join(config_dir, "settings.conf") # <--- CHANGED NAME
+    config_file = os.path.join(config_dir, "settings.conf")
 
     # Ensure directories exist
     if not os.path.exists(log_dir):
@@ -71,7 +71,7 @@ def setup_logging():
     if not os.path.exists(config_file):
         # Create file if missing with ALL sections
         config['LOGGING'] = logging_defaults
-        config['DASHBOARD'] = dashboard_defaults # <--- ADDED
+        config['DASHBOARD'] = dashboard_defaults
         
         try:
             with open(config_file, 'w') as f:

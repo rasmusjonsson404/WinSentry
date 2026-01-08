@@ -61,11 +61,13 @@ echo  4. Run with your own arguments
 echo  5. Add to Windows startup (Runs hidden at boot)
 echo  6. Remove from Windows startup
 echo  7. Stop background service (Kill process)
-echo  8. Quit
+echo  8. Run Test Script (Generate Events)
+echo  9. Reset Windows Security Log (Sets Count to 0)
+echo  10. Quit
 echo.
 echo Autostart: !color!!autostart_status!!ESC![0m
 echo.
-set /p choice="Choose (1-8): "
+set /p choice="Choose (1-10): "
 
 if "%choice%"=="1" goto RUN_DASHBOARD
 if "%choice%"=="2" goto RUN_TERMINAL
@@ -74,14 +76,16 @@ if "%choice%"=="4" goto RUN_CUSTOM
 if "%choice%"=="5" goto RUN_AUTOSTART
 if "%choice%"=="6" goto RUN_UNAUTOSTART
 if "%choice%"=="7" goto RUN_STOP
-if "%choice%"=="8" goto END
+if "%choice%"=="8" goto RUN_TEST
+if "%choice%"=="9" goto RUN_RESET_LOGS
+if "%choice%"=="10" goto END
 
 echo Not a valid choice
 pause
 goto MENU
 
 :RUN_DASHBOARD
-python main.py
+python main.py -d
 pause
 goto MENU
 
@@ -111,6 +115,19 @@ goto MENU
 
 :RUN_STOP
 python main.py --stop
+pause
+goto MENU
+
+:RUN_TEST
+echo.
+echo Launching Test Script...
+python tests/generate_events.py
+pause
+goto MENU
+
+:RUN_RESET_LOGS
+echo.
+python tests/reset_security_log.py
 pause
 goto MENU
 
