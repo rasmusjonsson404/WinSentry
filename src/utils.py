@@ -14,11 +14,33 @@ def is_admin():
     except:
         return False
 
+def stop_scheduled_task():
+    """Stops the running instance of WinSentry if it was started by Task Scheduler."""
+    if not is_admin():
+        cprint("ERROR: Admin privileges required to stop the background service.", "red")
+        return
+
+    task_name = "WinSentry"
+    print(f">> Attempting to stop background service '{task_name}'...")
+
+    # /End stops the task instance immediately
+    command = ["schtasks", "/End", "/TN", task_name]
+    
+    # We capture output to avoid ugly error messages if it wasn't running
+    result = subprocess.run(command, capture_output=True, text=True)
+    
+    if result.returncode == 0:
+        cprint("Success! The background service has been stopped.", "green")
+        logging.info("User manually stopped the background service via menu.")
+    else:
+        # Common error: The task is not currently running.
+        cprint("Service was not running (or could not be stopped).", "yellow")
+
 def install_scheduled_task():
     # Adding WinSentry to autostart through task scheduler
     if not is_admin():
         cprint("ERROR: You must be admin to run installation", "red")
-        logging.info("Did not manage to add program to windows startup. User do not have admin privileges.")
+        logging.info("Failed to add to startup: No admin privileges.")
         return
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,66 +53,52 @@ def install_scheduled_task():
         return
     
     task_name = "WinSentry"
-
     action_command = f'"{venv_python}" "{main_path}"'
     
-    # Running command to add to task scheduler
-    # /SC ONLOGON  = Run next login
-    # /RL HIGHEST  = Run at highest privilege (Admin/Elevated)
-    # /F           = Force
-    # /TR          = Task Run
-    
-    check_command = ["schtasks", "/Create", "/TN", task_name, "/TR", action_command, "/SC", "ONLOGON", "/RL", "HIGHEST", "/F"]
-
+    # /SC ONSTART = Run at boot (Hidden/Background)
     command = [
         "schtasks", "/Create",
         "/TN", task_name,
         "/TR", action_command,
-        "/SC", "ONLOGON",
+        "/SC", "ONSTART",
         "/RL", "HIGHEST",
         "/F"
     ]
 
-    # Check if adding autostart succeeded
     try:
         result = subprocess.run(command, capture_output=True, text=True)
         
         if result.returncode == 0:
-            cprint(f"Success! WinSentry added to autostart.", "green")
-            cprint(f"Using Python interpreter at: {venv_python}", "cyan")
+            cprint(f"Success! WinSentry added to autostart (System Startup).", "green")
+            cprint("The program will now start automatically when the computer turns on.", "cyan")
             logging.info("Successfully added program to windows startup.")
         else:
-            cprint(f"Did not manage to add to autostart: {result.stderr}", "red")
-            logging.error("Did not manage to add program to windows startup.")
+            cprint(f"Failed to add task: {result.stderr}", "red")
+            logging.error(f"Failed to add task: {result.stderr}")
             
     except Exception as e:
-        cprint(f"An error occurred at the installation: {e}", "red")
-        logging.error("Did not manage to add program to windows startup.")
+        cprint(f"An error occurred: {e}", "red")
+        logging.error(f"Error during installation: {e}")
 
 def uninstall_scheduled_task():
     if not is_admin():
         cprint("ERROR: You must be admin to run uninstallation", "red")
-        logging.error("Can not remove program from windows startup. User do not have admin privileges")
         return
     
     task_name = "WinSentry"
 
-    # Check if task exist
-    # "schtasks /Query" return 0 if it exist, 1 if missing.
-    check_command = ["schtasks", "/Query", "/TN", task_name]
-    
-    check_result = subprocess.run(
-        check_command, 
-        stdout=subprocess.DEVNULL, 
-        stderr=subprocess.DEVNULL
-    )
+    # STOP the task first (New functionality)
+    stop_scheduled_task()
 
-    # If task do not exist.
+    # Check if task exists
+    check_command = ["schtasks", "/Query", "/TN", task_name]
+    check_result = subprocess.run(check_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     if check_result.returncode != 0:
         cprint(f"Could not find any task with the name: '{task_name}'.", "yellow")
         return
 
-    # If exist remove task.
+    # Delete the task
     delete_command = ["schtasks", "/Delete", "/TN", task_name, "/F"]
 
     try:
@@ -100,9 +108,7 @@ def uninstall_scheduled_task():
             cprint(f"Success! '{task_name}' has been removed from autostart.", "green")
             logging.info("Program removed from windows startup.")
         else:
-            cprint(f"Critical error removing task: {delete_result.stderr.strip()}", "red")
-            logging.critical(f"{delete_result.stderr.strip()}")
+            cprint(f"Error removing task: {delete_result.stderr.strip()}", "red")
             
     except Exception as e:
-        cprint(f"An error occurred at uninstallation: {e}", "red")
-        logging.error(f"ERROR: {e}")
+        cprint(f"An error occurred: {e}", "red")
