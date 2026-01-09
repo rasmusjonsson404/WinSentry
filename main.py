@@ -23,7 +23,7 @@ def main():
     parser.add_argument("-v", "--version", action="version", version="WinSentry v0.1.0")
     parser.add_argument("-a", "--autostart", action="store_true", help="Install Autostart Task")
     parser.add_argument("-u", "--unautostart", action="store_true", help="Remove Autostart Task")
-    parser.add_argument("-d", "--default", action="store_true", help="Remove Autostart Task")
+    parser.add_argument("-d", "--default", action="store_true", help="Run with dashboard")
     parser.add_argument("--stop", action="store_true", help="Stop the background service")
     
     # Terminal Mode Flag

@@ -68,7 +68,7 @@ echo  11. Quit
 echo.
 echo Autostart: !color!!autostart_status!!ESC![0m
 echo.
-set /p choice="Choose (1-10): "
+set /p choice="Choose (1-11): "
 
 if "%choice%"=="1" goto RUN_DASHBOARD
 if "%choice%"=="2" goto RUN_TERMINAL
