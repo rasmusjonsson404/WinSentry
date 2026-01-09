@@ -6,6 +6,42 @@ import json
 import datetime
 import configparser
 
+# --- CUSTOM LOG NAMING LOGIC ---
+def log_namer(default_name):
+    """
+    Reorders the filename during log rotation to keep the .log extension at the end.
+    Input from Python:  .../winsentry.log.2026-01-08
+    Desired result:     .../winsentry_2026-01-08.log
+    """
+    # Separate directory path from filename
+    dirname, filename = os.path.split(default_name)
+    
+    # Split filename at dots
+    # Example: ['winsentry', 'log', '2026-01-08']
+    parts = filename.split('.')
+    
+    # Check if we have enough parts to swap
+    if len(parts) >= 3:
+        date_part = parts[-1]       # 2026-01-08
+        extension = parts[-2]       # log
+        base_name = ".".join(parts[:-2]) # winsentry
+        
+        # Construct new name: winsentry_2026-01-08.log
+        new_filename = f"{base_name}_{date_part}.{extension}"
+        return os.path.join(dirname, new_filename)
+    
+    # If format is unexpected, return original
+    return default_name
+
+class CustomRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
+    """
+    A wrapper around TimedRotatingFileHandler to use our custom namer.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.namer = log_namer
+# --- END CUSTOM LOGIC ---
+
 class JSONFormatter(logging.Formatter):
     """
     Custom formatter to output logs in JSON format.
@@ -113,7 +149,8 @@ def setup_logging():
         },
         'handlers': {
             'rotating_file_handler': {
-                'class': 'logging.handlers.TimedRotatingFileHandler',
+                # CHANGED: Point to our Custom Class instead of the standard one
+                'class': 'src.logger.CustomRotatingFileHandler',
                 'filename': log_filename,
                 'when': log_when,       
                 'interval': log_interval,   
