@@ -3,7 +3,7 @@ import sys
 import ctypes
 import time
 from termcolor import colored
-import logger
+import logging
 
 try:
     import colorama
@@ -35,19 +35,19 @@ def clear_security_log():
     confirm = input("Are you sure you want to proceed? (Y/N): ")
     
     if confirm.upper() == "Y":
-        logger.info("User confirmed to delete windows security logs.")
+        logging.info("User confirmed to delete windows security logs.")
         print("\n>> Clearing Windows Security Log...")
         result = os.system("wevtutil cl Security")
         
         if result == 0:
-            logger.info("Windows security logs deleted by user.")
+            logging.info("Windows security logs deleted by user.")
             print(colored(">> Success! Security Log has been reset to 0.", "green"))
             print(">> If you restart WinSentry now, the counter will be 0.")
         else:
-            logger.info("Program did not manage to delete Windows security logs.")
+            logging.info("Program did not manage to delete Windows security logs.")
             print(colored(f">> Failed to clear log. Error code: {result}", "red"))
     else:
-        logger.info("Clearing Windows security logs cancelled.")
+        logging.info("Clearing Windows security logs cancelled.")
         print("Operation cancelled.")
 
 if __name__ == "__main__":
