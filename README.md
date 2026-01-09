@@ -78,6 +78,7 @@ Double-click `Run.bat` to start the application. It will automatically ask for A
 7. **Stop Background Service:** Immediately stops the hidden background process.
 8. **Generate Events:** Generate N events for login to see data.
 9. **Erase logs:** Erase the logs to test the program from 0.
+11. **Check version:** Check current version of program.
 10. **Quit:** Exits the launcher.
 
 ### Generate test events

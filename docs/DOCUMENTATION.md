@@ -45,6 +45,7 @@ Upon running `Run.bat`, you are presented with the following options:
 7.  **Stop background service:** Kills any running background instances.
 8. **Run Test:** Run Test Script (Generate Events)
 9. **Clear security logs:** Run script to remove all security logs from windows (Only do to test the application from scratch).
+10. **Check current version:** Check the current version of the program.
 
 ### Command Line Interface (CLI)
 Advanced users can run `main.py` directly using the virtual environment's Python executable.

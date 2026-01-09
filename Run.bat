@@ -63,7 +63,8 @@ echo  6. Remove from Windows startup
 echo  7. Stop background service (Kill process)
 echo  8. Run Test Script (Generate Events)
 echo  9. Reset Windows Security Log (Sets Count to 0)
-echo  10. Quit
+echo  10. Check current version
+echo  11. Quit
 echo.
 echo Autostart: !color!!autostart_status!!ESC![0m
 echo.
@@ -78,7 +79,8 @@ if "%choice%"=="6" goto RUN_UNAUTOSTART
 if "%choice%"=="7" goto RUN_STOP
 if "%choice%"=="8" goto RUN_TEST
 if "%choice%"=="9" goto RUN_RESET_LOGS
-if "%choice%"=="10" goto END
+if "%choice%"=="10" goto CHECK_VERSION
+if "%choice%"=="11" goto END
 
 echo Not a valid choice
 pause
@@ -128,6 +130,12 @@ goto MENU
 :RUN_RESET_LOGS
 echo.
 python tests/reset_security_log.py
+pause
+goto MENU
+
+:CHECK_VERSION 
+echo.
+python main.py -v
 pause
 goto MENU
 
