@@ -24,7 +24,7 @@ It reads raw Windows Event Logs via the Win32 API, parses complex message string
 - [Preview](#-preview)
 - [Key Features](#-key-features)
 - [System Requirements](#-system-requirements)
-- [Installation](##%EF%B8%8F-installation)
+- [Installation](#%EF%B8%8F-installation)
 - [Usage](#-usage)
 - [Configuration](#%EF%B8%8F-installation)
 - [Autostart & Background Service](#-autostart--background-service)
