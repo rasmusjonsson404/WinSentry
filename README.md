@@ -13,17 +13,15 @@
 **This program requires administrator privileges to function properly.**
 The included launcher (`Run.bat`) will automatically request these privileges when started.
 
-## 🗺 Roadmap
+## 🔭 Project Overview
+The primary mission of WinSentry is to detect potential security threats, such as brute-force attacks, by monitoring the Windows Security Log. Unlike simple scripts, WinSentry utilizes a **defensive programming architecture** to ensure resilience against crashes and environment errors.
 
-| Version | Status | Focus | Key Features |
-| :--- | :--- | :--- | :--- |
-| **v0.1.0** | ✅ **Completed** | **MVP (Core)** | • Log Ingestion (ID 4625)<br>• Web Dashboard (Dash)<br>• JSON Structured Logging<br>• Admin Auto-elevation<br>• Centralized Config<br>• Available test script |
-| **v0.2.0** | 🚧 *In Progress* | **Optimization** | • Filter by Date Range in Dashboard<br>• Export Report to CSV/PDF<br>• Support for more Event ID:s |
-| **v0.3.0** | 🔮 *Planned* | **Advanced Analysis** | • IP Geolocation Mapping<br>• Email Alerts for High Failure Rate<br>• Multi-Server Log Aggregation |
-| **v1.0.0** | 🔮 *Planned* | **Production** | • Docker Containerization<br>• User Authentication for Dashboard<br>• SIEM Forwarder Integration |
+It reads raw Windows Event Logs via the Win32 API, parses complex message strings using Regular Expressions (Regex), and visualizes the data using **Dash** and **Pandas**.
 
 ## 📋 Table of Contents
 - [Project Overview](#-project-overview)
+- [Roadmap](#-roadmap)
+- [Preview](#-preview)
 - [Key Features](#-key-features)
 - [System Requirements](#-system-requirements)
 - [Installation](##%EF%B8%8F-installation)
@@ -33,10 +31,22 @@ The included launcher (`Run.bat`) will automatically request these privileges wh
 - [Logging](#-logging--diagnostics)
 - [Documentation](#-documentation)
 
-## 🔭 Project Overview
-The primary mission of WinSentry is to detect potential security threats, such as brute-force attacks, by monitoring the Windows Security Log. Unlike simple scripts, WinSentry utilizes a **defensive programming architecture** to ensure resilience against crashes and environment errors.
+## 🗺 Roadmap
 
-It reads raw Windows Event Logs via the Win32 API, parses complex message strings using Regular Expressions (Regex), and visualizes the data using **Dash** and **Pandas**.
+| Version | Status | Focus | Key Features |
+| :--- | :--- | :--- | :--- |
+| **v0.1.0** | ✅ **Completed** | **MVP (Core)** | • Log Ingestion (ID 4625)<br>• Web Dashboard (Dash)<br>• JSON Structured Logging<br>• Admin Auto-elevation<br>• Centralized Config<br>• Available test script |
+| **v0.2.0** | 🚧 *In Progress* | **Optimization** | • Filter by Date Range in Dashboard<br>• Export Report to CSV/PDF<br>• Support for more Event ID:s |
+| **v0.3.0** | 🔮 *Planned* | **Advanced Analysis** | • IP Geolocation Mapping<br>• Email Alerts for High Failure Rate<br>• Multi-Server Log Aggregation |
+| **v1.0.0** | 🔮 *Planned* | **Production** | • Docker Containerization<br>• User Authentication for Dashboard<br>• SIEM Forwarder Integration |
+
+## 📸 Preview
+
+<div align="center">
+  <img src="assets/display/preview.png" alt="WinSentry Web Dashboard" width="100%">
+  <p><i>Real-time monitoring dashboard showing attack timeline and KPIs</i></p>
+</div>
+<br>
 
 ## ✨ Key Features
 * **Live Data Ingestion:** Real-time reading of Windows Event Logs using `pywin32`.
