@@ -239,8 +239,13 @@ def run_dashboard():
             )
             return "0", "N/A", empty_fig, empty_fig, "No failed logins detected recently.", log_text, now_str, status_msg
 
+        # Ensure forensic columns exist (prevents KeyErrors if regex fails)
+        for col in ['Source_IP', 'Target_User', 'Failure_Reason']:
+            if col not in df.columns:
+                df[col] = "N/A"
+
         total_failures = len(df)
-        top_ip = df['Source_IP'].mode()[0] if not df['Source_IP'].empty else "N/A"
+        top_ip = df['Source_IP'].mode()[0] if not df['Source_IP'].mode().empty else "N/A"
 
         # Dynamic grouping based on drop-down
         # 's' = Second, 'min' = Minute, 'h' = Hour, 'd' = Day
@@ -268,13 +273,15 @@ def run_dashboard():
         display_cols = ['TimeGenerated', 'Target_User', 'Source_IP', 'Failure_Reason']
         valid_cols = [c for c in display_cols if c in df.columns]
         
+        table_data = df[valid_cols].head(10).astype(str).to_dict('records')
+        
         table = dash_table.DataTable(
-            data=df[valid_cols].head(10).to_dict('records'),
+            data=table_data,
             columns=[{'name': i, 'id': i} for i in valid_cols],
             style_header={'backgroundColor': '#21262d', 'color': COLORS['text'], 'fontWeight': 'bold', 'border': f'1px solid {COLORS["border"]}'},
             style_cell={'backgroundColor': COLORS['background'], 'color': COLORS['text'], 'border': f'1px solid {COLORS["border"]}'},
             style_data_conditional=[
-                {'if': {'row_index': 'odd'}, 'backgroundColor': COLORS['paper']}
+                {'if': {'row_index': 'odd'}, 'background_color': COLORS['paper']}
             ]
         )
 

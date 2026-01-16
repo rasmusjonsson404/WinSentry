@@ -42,11 +42,11 @@ class LogProcessor:
         # Create initial DataFrame
         df = pd.DataFrame(raw_logs)
 
-	# Set EventID to 0 if missing. Prevents script from crashing.
+        # Set EventID to 0 if missing. Prevents script from crashing.
         if 'EventID' not in df.columns:
             df['EventID'] = 0        
 
-	# Apply Regex Extraction for Event ID 4625 (Failed Login)
+        # Apply Regex Extraction for Event ID 4625 (Failed Login)
         # We only apply this logic to rows where EventID is 4625
         mask_4625 = df['EventID'] == 4625
 

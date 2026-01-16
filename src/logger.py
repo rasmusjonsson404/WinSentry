@@ -58,8 +58,7 @@ class JSONFormatter(logging.Formatter):
             "line_number": record.lineno
         }
         
-        if hasattr(record, 'error_code'):
-            log_record['error_code'] = record.error_code
+        log_record['error_code'] = getattr(record, 'error_code', None)
 
         if record.exc_info:
             log_record['traceback'] = self.formatException(record.exc_info)
